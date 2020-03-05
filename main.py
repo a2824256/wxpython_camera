@@ -2,7 +2,7 @@ import cv2
 from wx import *
 
 
-COVER = 'screenshot1.png'
+COVER = 'screenshot.png'
 
 
 class camera(Frame):
