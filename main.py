@@ -42,7 +42,8 @@ class camera(Frame):
            flag, im_rd = self.cap.read()
            self.k = cv2.waitKey(1)
 
-           if(self.k == ord('q')):
+           if(self.k == ord('a')):
+               # TODO 拍照
                break
            height,width = im_rd.shape[:2]
            image1 = cv2.cvtColor(im_rd, cv2.COLOR_BGR2RGB)
