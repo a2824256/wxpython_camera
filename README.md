@@ -1,6 +1,9 @@
 # wxpython_camera
 wxpython编写的获取摄像头图像程序
 
+# 使用方法
+按A拍照
+
 # Conda环境配置（python 3.7）
 安装wxpython
 ```shell
