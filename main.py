@@ -1,7 +1,9 @@
 import cv2
 from wx import *
+from pynput import keyboard
 
 COVER = 'screenshot.png'
+
 
 
 class camera(Frame):
@@ -15,32 +17,38 @@ class camera(Frame):
 
         start_button = Button(self.panel, label='Start')
         close_button = Button(self.panel, label='Close')
+        take_button = Button(self.panel, label='Take photo')
 
         self.Bind(EVT_BUTTON, self.start, start_button)
         self.Bind(EVT_BUTTON, self.close, close_button)
+        self.Bind(EVT_BUTTON, self.take, take_button)
         self.grid_bag_sizer = GridBagSizer(hgap=5, vgap=5)
         self.grid_bag_sizer.Add(self.bmp, pos=(0, 0), flag=ALL | EXPAND, span=(4, 4), border=5)
         self.grid_bag_sizer.Add(start_button, pos=(4, 1), flag=ALL | ALIGN_CENTER_VERTICAL, span=(1, 1), border=5)
         self.grid_bag_sizer.Add(close_button, pos=(4, 2), flag=ALL | ALIGN_CENTER_VERTICAL, span=(1, 1), border=5)
+        self.grid_bag_sizer.Add(take_button, pos=(4, 3), flag=ALL | ALIGN_CENTER_VERTICAL, span=(1, 1), border=5)
 
         self.grid_bag_sizer.AddGrowableCol(0, 1)
         self.grid_bag_sizer.AddGrowableRow(0, 1)
         self.panel.SetSizer(self.grid_bag_sizer)
         self.grid_bag_sizer.Fit(self)
 
+
+
     def open_camera(self, event):
         self.cap = cv2.VideoCapture(0)
-        self.cap.set(3, 480)
+        # self.cap.set(3, 480)
         self.cnt = 0
         counter = 0
         while (self.cap.isOpened()):
 
             flag, im_rd = self.cap.read()
-            self.k = cv2.waitKey(1)
-
-            if (self.k == ord('a')):
-                cv2.imwrite(counter, im_rd)
-                break
+            self.frame = im_rd
+            #k = cv2.waitKey(1)
+            #print(k)
+            #if k == ord('a'):
+                #cv2.imwrite("test.jpg", im_rd)
+                #break
             height, width = im_rd.shape[:2]
             image1 = cv2.cvtColor(im_rd, cv2.COLOR_BGR2RGB)
             pic = Bitmap.FromBuffer(width, height, image1)
@@ -48,6 +56,9 @@ class camera(Frame):
             self.grid_bag_sizer.Fit(self)
             counter += 1
         self.cap.release()
+
+    def take(self, event):
+        cv2.imwrite("test.jpg", self.frame)
 
     def start(self, event):
         # 多线程
