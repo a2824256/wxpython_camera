@@ -11,7 +11,6 @@ class camera(Frame):
        Frame.__init__(self,parent,title=title,size=(600,600))
        self.panel = Panel(self)
        self.Center()
-
        self.image_cover = Image(COVER, BITMAP_TYPE_ANY).Scale(350,300)
        self.bmp = StaticBitmap(self.panel, -1, Bitmap(self.image_cover))
 
@@ -36,7 +35,7 @@ class camera(Frame):
        self.cap = cv2.VideoCapture(0)
        self.cap.set(3, 480)
        self.cnt = 0
-
+       counter = 0
        while(self.cap.isOpened()):
 
            flag, im_rd = self.cap.read()
@@ -44,13 +43,14 @@ class camera(Frame):
 
            if(self.k == ord('a')):
                # TODO 拍照
+               cv2.imwrite("screenshot-"+counter+".png", im_rd)
                break
            height,width = im_rd.shape[:2]
            image1 = cv2.cvtColor(im_rd, cv2.COLOR_BGR2RGB)
            pic = Bitmap.FromBuffer(width,height,image1)
            self.bmp.SetBitmap(pic)
            self.grid_bag_sizer.Fit(self)
-
+           counter+=1
        self.cap.release()
 
 

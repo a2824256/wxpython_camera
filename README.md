@@ -12,7 +12,7 @@ conda install -c menpo opencv
 ``` 
 
 # TODO List
-1. 实现截图功能
+1. ~~实现截图功能~~
 
 # 演示效果
 ![screenshot](https://github.com/a2824256/wxpython_camera/blob/master/screenshot.png)
