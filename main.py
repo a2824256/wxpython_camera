@@ -1,13 +1,20 @@
 import cv2
 from wx import *
+# 支持intel realsense2
+import pyrealsense2 as rs
+import png
+# 支持zed mini
 import pyzed.sl as sl
 import math
 import numpy as np
 import sys
 from PIL import Image as img
+import json
 COVER = 'screenshot.png'
 TYPE = "zed"
-
+# 图像尺寸
+WIDTH = 640
+HEIGHT = 480
 
 class camera(Frame):
 
@@ -25,7 +32,7 @@ class camera(Frame):
         self.Bind(EVT_BUTTON, self.start, start_button)
         self.Bind(EVT_BUTTON, self.close, close_button)
         # 修改截图命令
-        self.Bind(EVT_BUTTON, self.zed_take, take_button)
+        self.Bind(EVT_BUTTON, self.take, take_button)
         self.grid_bag_sizer = GridBagSizer(hgap=5, vgap=5)
         self.grid_bag_sizer.Add(self.bmp, pos=(0, 0), flag=ALL | EXPAND, span=(4, 4), border=5)
         self.grid_bag_sizer.Add(start_button, pos=(4, 1), flag=ALL | ALIGN_CENTER_VERTICAL, span=(1, 1), border=5)
@@ -60,6 +67,43 @@ class camera(Frame):
             counter += 1
         self.cap.release()
 
+    # 打开realsense摄像头
+    def open_realsense(self, event):
+        pipeline = rs.pipeline()
+        config = rs.config()
+        config.enable_stream(rs.stream.depth, WIDTH, HEIGHT, rs.format.z16, 30)
+        config.enable_stream(rs.stream.color, WIDTH, HEIGHT, rs.format.bgr8, 30)
+        # Start pipeline
+        profile = pipeline.start(config)
+        frames = pipeline.wait_for_frames()
+        color_frame = frames.get_color_frame()
+        # Color Intrinsics
+        intr = color_frame.profile.as_video_stream_profile().intrinsics
+        camera_parameters = {'fx': intr.fx, 'fy': intr.fy,
+                             'ppx': intr.ppx, 'ppy': intr.ppy,
+                             'height': intr.height, 'width': intr.width,
+                             'depth_scale': profile.get_device().first_depth_sensor().get_depth_scale()
+                             }
+        with open('./intrinsics.json', 'w') as fp:
+            json.dump(camera_parameters, fp)
+
+        align_to = rs.stream.color
+        align = rs.align(align_to)
+        while True:
+            frames = pipeline.wait_for_frames()
+            aligned_frames = align.process(frames)
+
+            aligned_depth_frame = aligned_frames.get_depth_frame()
+            color_frame = aligned_frames.get_color_frame()
+            if not aligned_depth_frame or not color_frame:
+                continue
+
+            d = np.asanyarray(aligned_depth_frame.get_data())
+            c = np.asanyarray(color_frame.get_data())
+            self.depth = d
+            self.frame = c
+        pipeline.stop()
+
     # zed_mini 自带驱动打开摄像头
     def open_zed(self, event):
         self.zed = sl.Camera()
@@ -68,7 +112,7 @@ class camera(Frame):
         init_params = sl.InitParameters()
         init_params.depth_mode = sl.DEPTH_MODE.QUALITY  # Use PERFORMANCE depth mode
         init_params.coordinate_units = sl.UNIT.METER  # Use meter units (for depth measurements)
-        init_params.camera_resolution = sl.RESOLUTION.VGA
+        init_params.camera_resolution = sl.RESOLUTION.VGA # 此处修改图像尺寸
         init_params.camera_fps = 100
 
         # Open the camera
@@ -142,6 +186,17 @@ class camera(Frame):
         # Close the camera
         self.zed.close()
 
+    # realsense截图函数
+    def realsense_take(self, event):
+        cv2.imwrite(str(self.counter) + ".jpg", self.frame)
+        with open(str(self.counter) + "_depth.jpg", 'wb') as f:
+            writer = png.Writer(width=self.depth.shape[1], height=self.depth.shape[0],
+                                bitdepth=16, greyscale=True)
+            zgray2list = self.depth.tolist()
+            writer.write(f, zgray2list)
+        self.counter += 1
+
+    # zed mini截图函数
     def zed_take(self, event):
         img1 = self.image.get_data()
         # dimg = self.depth.get_data()
@@ -163,7 +218,7 @@ class camera(Frame):
             depth_img2.save(str(self.counter) + "_d.jpg")
         self.counter += 1
 
-
+    #一般免驱摄像头截取函数
     def take(self, event):
         cv2.imwrite(str(self.counter) + ".jpg", self.frame)
         self.counter += 1
@@ -171,7 +226,7 @@ class camera(Frame):
     def start(self, event):
         import _thread
         # 在此修改选用哪种摄像头
-        _thread.start_new_thread(self.open_zed, (event,))
+        _thread.start_new_thread(self.open_camera, (event,))
 
     def close(self, event):
         if TYPE == "zed":
