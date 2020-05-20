@@ -2,9 +2,9 @@
 wxpython编写的获取摄像头图像程序，支持一般免驱摄像头、zed mini、intel realsense
 
 # 已测试的摄像头类型
-[]640 x 480分辨率的免驱摄像头<br>
-[]intel realsense双目摄像头<br>
-[]zed mini双目摄像头<br>
+[✓]640 x 480分辨率的免驱摄像头<br>
+[✓]intel realsense双目摄像头<br>
+[✓]zed mini双目摄像头<br>
 
 # 使用方法
 点击take photo按钮
