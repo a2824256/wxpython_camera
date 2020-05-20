@@ -25,3 +25,4 @@ conda install -c menpo opencv
 
 # TODO List
 1.更新使用教程
+2.完善摄像头类型选择逻辑
