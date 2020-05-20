@@ -10,18 +10,18 @@ wxpython编写的获取摄像头图像程序，支持一般免驱摄像头、zed
 点击take photo按钮
 
 # Conda环境配置（python 3.7）
-安装wxpython
+#### 安装wxpython
 ```shell
 conda install wxpython
 ```
-安装opencv
+#### 安装opencv
 ```
 conda install -c menpo opencv
 ``` 
-安装zed mini驱动<br>
+#### 安装zed mini驱动
 教程:https://github.com/stereolabs/zed-python-api/blob/master/README.md
 
-安装intel realsense驱动(Mac需要手动编译源码安装)
+#### 安装intel realsense驱动(Mac需要手动编译源码安装)
 ```shell
 pip install pyrealsense2
 ```
