@@ -32,6 +32,8 @@ pip install pyrealsense2
 ##### 2020/04/26
 1. 支持zed mini摄像头
 
+##### 2020/05/13
+1. 支持intel realsense摄像头
 
 # TODO List
 1.更新使用教程<br>
